@@ -4,6 +4,8 @@ const readline = require('readline/promises');
 const { stdin: input, stdout: output } = require('process');
 
 (() => {
+  const EXIT_COMMAND = 'exit';
+
   const greeting = '👋Please enter text. Type "exit" or press Ctrl+C to quit.';
   const farewell = 'See you!🙌';
 
@@ -15,7 +17,7 @@ const { stdin: input, stdout: output } = require('process');
   console.log(greeting);
 
   rl.on('line', (line) => {
-    if (line === 'exit') {
+    if (line === EXIT_COMMAND) {
       rl.close();
     } else {
       writeStream.write(`${line}\n`);
