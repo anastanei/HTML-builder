@@ -1,6 +1,6 @@
 const fs = require('node:fs');
-const path = require('path');
-const readline = require('readline/promises');
+const path = require('node:path');
+const readline = require('node:readline');
 const { stdin: input, stdout: output } = require('process');
 
 (() => {
@@ -25,7 +25,8 @@ const { stdin: input, stdout: output } = require('process');
   });
 
   rl.on('close', () => {
-    console.log(farewell);
-    writeStream.close();
+    writeStream.end(() => {
+      console.log(farewell);
+    });
   });
 })();
