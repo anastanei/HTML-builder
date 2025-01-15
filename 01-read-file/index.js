@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const { pipeline } = require('stream/promises');
+const fs = require('node:fs');
+const path = require('node:path');
+const { pipeline } = require('node:stream/promises');
 
 (async () => {
   try {

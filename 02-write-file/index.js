@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 const path = require('path');
 const readline = require('readline/promises');
 const { stdin: input, stdout: output } = require('process');
