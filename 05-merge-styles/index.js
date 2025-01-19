@@ -1,15 +1,9 @@
 const path = require('node:path');
 const { readdir, writeFile, readFile } = require('node:fs/promises');
 
-async function mergeFiles({
-  ext = '.css',
-  srcDir = 'styles',
-  destName = 'bundle.css',
-  destDir = 'project-dist',
-}) {
-  const srcPath = path.join(__dirname, srcDir);
+async function mergeStyles({ ext = '.css', srcPath, destName, destPath }) {
   const separator = '\n';
-  const destPath = path.join(__dirname, destDir, destName);
+  const destFilePath = path.join(destPath, destName);
   const entries = await readdir(srcPath, { withFileTypes: true });
   const styles = entries.filter(
     (entry) => entry.isFile() && path.extname(entry.name) === ext,
@@ -22,7 +16,12 @@ async function mergeFiles({
     }),
   );
   const mergedFiles = filesData.join(separator);
-  await writeFile(destPath, mergedFiles);
+  await writeFile(destFilePath, mergedFiles);
 }
 
-mergeFiles({});
+const srcPath = path.join(__dirname, 'styles');
+const destPath = path.join(__dirname, 'project-dist');
+
+mergeStyles({ srcPath, destPath, destName: 'bundle.css' });
+
+module.exports = { mergeStyles };
