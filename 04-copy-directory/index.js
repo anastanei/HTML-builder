@@ -1,33 +1,50 @@
 const path = require('node:path');
 const { mkdir, readdir, copyFile, rm } = require('node:fs/promises');
 
-const srcDir = 'files';
-const destDir = 'files-copy';
-
-async function makeDirectory(dirName) {
-  const projectFolder = path.join(__dirname, dirName);
-  const dirCreation = await mkdir(projectFolder);
-  return dirCreation;
-}
-
-async function getFiles(dirName) {
-  const pathName = path.join(__dirname, dirName);
-  const dirEntries = await readdir(pathName, { withFileTypes: true });
-  return dirEntries.filter((dirEntry) => dirEntry.isFile());
-}
-
-async function copyDir(srcDir, destDir) {
-  const destPath = path.join(__dirname, destDir);
-  await rm(destPath, { recursive: true, force: true });
-  await makeDirectory(destDir);
-  const files = await getFiles(srcDir);
+async function clearDirectory(destPath) {
+  const entries = await readdir(destPath, { withFileTypes: true });
   await Promise.all(
-    files.map(async (file) => {
-      const srcPath = path.join(__dirname, srcDir, file.name);
-      const destPath = path.join(__dirname, destDir, file.name);
-      await copyFile(srcPath, destPath);
+    entries.map(async (entry) => {
+      const fullPath = path.join(destPath, entry.name);
+      await rm(fullPath, { recursive: true, force: true });
     }),
   );
 }
 
-copyDir(srcDir, destDir);
+async function copyDirRecursive({ srcPath, destPath }) {
+  await mkdir(destPath, { recursive: true });
+  const entries = await readdir(srcPath, { withFileTypes: true });
+  await Promise.all(
+    entries.map(async (entry) => {
+      const srcNextPath = path.join(srcPath, entry.name);
+      const destNextPath = path.join(destPath, entry.name);
+      if (entry.isDirectory()) {
+        await copyDirRecursive({
+          srcPath: srcNextPath,
+          destPath: destNextPath,
+        });
+      } else {
+        await copyFile(srcNextPath, destNextPath);
+      }
+    }),
+  );
+}
+
+async function copyDir({ srcPath, destPath }) {
+  const mkdirAnswer = await mkdir(destPath, { recursive: true });
+  if (!mkdirAnswer) {
+    await clearDirectory(destPath);
+  }
+  await copyDirRecursive({ srcPath, destPath });
+}
+
+const srcDir = 'files';
+const destDir = 'files-copy';
+const destPath = path.join(__dirname, destDir);
+const srcPath = path.join(__dirname, srcDir);
+
+copyDir({ srcPath, destPath });
+
+module.exports = {
+  copyDir,
+};
